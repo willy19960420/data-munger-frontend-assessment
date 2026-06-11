@@ -37,6 +37,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
             : antdTheme.defaultAlgorithm,
           token: {
             fontSize: 16,
+            fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`,
+            colorText: isDark ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)',
+            colorTextSecondary: isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.65)',
+            colorBgBase: isDark ? '#141414' : '#ffffff',
+            colorBorder: isDark ? '#434343' : '#d9d9d9',
+            lineHeight: 1.5,
+            lineHeightHeading1: 1.4,
+            fontWeightStrong: 600,
           },
         }}
       >
