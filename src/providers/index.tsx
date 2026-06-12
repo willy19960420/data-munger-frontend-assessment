@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { ConfigProvider, theme as antdTheme, App as AntApp } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -27,6 +26,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   const isDark = theme === 'dark';
+
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   return (
     <QueryClientProvider client={queryClient}>

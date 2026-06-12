@@ -52,7 +52,7 @@ src/
 │   └── StockChart/           # 圖表展示（React.memo）
 ├── services/
 │   ├── api.ts                # Axios 實例 + 攔截器
-│   └── taiwanStockServices.ts # 股票 API 服務（Server 端 fetch）
+│   └── stockServices.ts # 股票 API 服務（Server 端 fetch）
 ├── stores/
 │   └── themeStore.ts         # Zustand 主題狀態
 ├── types/
