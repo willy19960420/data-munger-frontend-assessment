@@ -1,5 +1,5 @@
 import api from './api';
-import type { StockInfoResponse, StockDetailParams, StockDetailResponse } from '@/types/stock';
+import type { StockInfoResponse, StockMonthRevenueParams, StockDetailResponse } from '@/types/stock';
 
 export const StockServices = {
   /**
@@ -20,10 +20,10 @@ export const StockServices = {
   /**
    * 獲取特定股票的詳細信息
    */
-  async getStockDetailData(params: StockDetailParams): Promise<StockDetailResponse> {
+  async getStockMonthRevenue(params: StockMonthRevenueParams): Promise<StockDetailResponse> {
     try {
       const response = await api.get<StockDetailResponse>(
-        'https://api.finmindtrade.com/api/v4/data',
+        'https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockMonthRevenue',
         { params }
       );
       return response.data;

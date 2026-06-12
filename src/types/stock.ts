@@ -17,14 +17,13 @@ export interface ApiResponse<T = StockItem[]> {
 export type StockInfoResponse = ApiResponse<StockItem[]>;
 
 // 股票詳細數據請求參數
-export interface StockDetailParams {
+export interface StockMonthRevenueParams {
   data_id: string;      // 股票代碼（必需）
-  dataset: string;       // 數據集名稱，如：'TaiwanStockPrice'（必需）
   start_date?: string;   // 開始日期（可選）
   end_date?: string;     // 結束日期（可選）
 }
 
-export interface StockDetailItem {
+export interface StockMonthRevenueItem {
   date: string;         // 日期 (YYYY-MM-DD 格式)
   stock_id: string;     // 股票代碼
   country: string;      // 國家，如：Taiwan
@@ -34,4 +33,4 @@ export interface StockDetailItem {
   create_time: string;   // 資料創建時間
 }
 
-export type StockDetailResponse = ApiResponse<StockDetailItem[]>;
+export type StockDetailResponse = ApiResponse<StockMonthRevenueItem[]>;

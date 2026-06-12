@@ -5,13 +5,13 @@ import { StockTable } from '@/components/stocks/StockTable';
 import { StockChart } from '@/components/stocks/StockChart';
 import { ToggleTheme } from '@/components/toggleTheme';
 
-import { useStockDetailData } from './hooks/useStockDetailData';
+import { useStockMonthRevenueData } from './hooks/useStockMonthRevenueData';
 import { Divider, Spin, Empty, Button } from 'antd';
 
 
 export const StockDashboard = () => {
 
-  const { selectedStock, setSelectedStock, data, isLoading, isEmpty, error, refetch } = useStockDetailData();
+  const { selectedStock, setSelectedStock, stockMonthRevenue, isLoading, isEmpty, error, refetch } = useStockMonthRevenueData();
 
   if (error) {
     return (
@@ -63,6 +63,16 @@ export const StockDashboard = () => {
             />
           </div>
         )}
+
+
+        {
+          selectedStock && !isEmpty && (
+            <>
+              
+              <StockTable stockMonthRevenue={stockMonthRevenue} />
+            </>
+          )
+        }
 
         
         
