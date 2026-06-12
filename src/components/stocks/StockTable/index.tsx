@@ -9,6 +9,15 @@ interface StockTableProps {
   stockMonthRevenue?: StockMonthRevenueItem[];
 }
 
+const PILL_STYLE: React.CSSProperties = {
+  borderRadius: '3px',
+  padding: '8px 16px',
+  fontSize: '13px',
+  fontWeight: 600,
+  lineHeight: 1,
+  margin: '12px 0',
+};
+
 export const StockTable = ({
   stockMonthRevenue = [],
 }: StockTableProps) => {
@@ -78,14 +87,8 @@ export const StockTable = ({
   }, [columns.length]);
 
   return (
-    <div ref={tableWrapperRef} style={{ marginTop: '20px' }}>
-      <Button type="primary"
-        style={{ 
-          marginBottom: '16px', 
-          padding: '10px 16px',
-          cursor: 'default',
-        }}
-      >詳細數據</Button>
+    <div ref={tableWrapperRef}>
+      <Button type="primary" style={PILL_STYLE}>詳細數據</Button>
 
       <Table
         columns={columns}

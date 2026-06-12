@@ -64,7 +64,10 @@ export const StockDashboard = () => {
             />
           </div>
         ) : (
-          <StockTable stockMonthRevenue={stockMonthRevenue} />
+          <>
+            <StockChart stockMonthRevenue={stockMonthRevenue} />
+            <StockTable stockMonthRevenue={stockMonthRevenue} />
+          </>
         )}
         
       </div>

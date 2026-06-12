@@ -52,3 +52,13 @@ export interface UseTableDataResult {
   columns: StockTableColumn[];
   dataSource: StockTableRow[];
 }
+
+export interface RevenueSeriesItem {
+  monthKey: string;
+  revenue: number;
+  yoy: number | null;
+}
+
+export interface UseRevenueSeriesResult {
+  series: RevenueSeriesItem[];
+}
