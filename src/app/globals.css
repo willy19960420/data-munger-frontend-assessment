@@ -1,13 +1,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme='dark'] {
+  --background: #141414;
+  --foreground: #ffffff;
+  color-scheme: dark;
 }
 
 html {
@@ -26,6 +26,9 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
