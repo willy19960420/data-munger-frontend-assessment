@@ -27,7 +27,7 @@ export const useStockDetailData = () => {
 
   const [selectedStock, setSelectedStock] = useState<StockItem | null>(null);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['stockDetail', selectedStock?.stock_id],
     queryFn: async () => {
       const response = await StockServices.getStockDetailData({
@@ -47,26 +47,17 @@ export const useStockDetailData = () => {
     staleTime: 1000 * 60 * 5, // 5 分鐘快取
   });
 
-  // 資料處理和轉換
-  const processedData: StockPriceData[] = (data || [])
-    .map((item: any) => ({
-      date: item.date,
-      open: parseFloat(item.open) || 0,
-      high: parseFloat(item.high) || 0,
-      low: parseFloat(item.low) || 0,
-      close: parseFloat(item.close) || 0,
-      volume: parseInt(item.volume) || 0,
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
 
   return {
     selectedStock,
     setSelectedStock,
 
-    data: processedData,
+    data,
     rawData: data,
     isLoading,
     error: error as Error | null,
     isEmpty: !data || data.length === 0,
+    refetch,
   };
 };

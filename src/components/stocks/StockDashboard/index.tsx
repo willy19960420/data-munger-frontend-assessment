@@ -6,14 +6,30 @@ import { StockChart } from '@/components/stocks/StockChart';
 import { ToggleTheme } from '@/components/toggleTheme';
 
 import { useStockDetailData } from './hooks/useStockDetailData';
-import { Divider } from 'antd';
+import { Divider, Spin, Empty, Button } from 'antd';
+
 
 export const StockDashboard = () => {
 
-  const { selectedStock, setSelectedStock, data, isLoading, error } = useStockDetailData();
+  const { selectedStock, setSelectedStock, data, isLoading, isEmpty, error, refetch } = useStockDetailData();
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <Empty
+          description={'載入失敗，請稍後重試'}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+        <Button type="primary" onClick={() => refetch()}>
+          重試
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', padding: '24px' }}>
+      <Spin spinning={isLoading}></Spin>
       <div
         style={{
           display: 'flex',
@@ -38,7 +54,18 @@ export const StockDashboard = () => {
         <SearchBar onSelect={setSelectedStock} />
         <Divider />
 
+        
+        {isEmpty && !isLoading && (
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <Empty
+              description={selectedStock ? '沒有找到相關數據' : '請先搜尋並選擇一支股票'}
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          </div>
+        )}
 
+        
+        
         {/* {selectedStock && (
           <div style={{ marginTop: '30px' }}>
             <h2>{selectedStock.stock_name} ({selectedStock.stock_id})</h2>

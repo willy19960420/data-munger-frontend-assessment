@@ -24,7 +24,7 @@ export interface StockDetailParams {
   end_date?: string;     // 結束日期（可選）
 }
 
-export interface StockDetailITem {
+export interface StockDetailItem {
   date: string;         // 日期 (YYYY-MM-DD 格式)
   stock_id: string;     // 股票代碼
   country: string;      // 國家，如：Taiwan
@@ -34,4 +34,4 @@ export interface StockDetailITem {
   create_time: string;   // 資料創建時間
 }
 
-export type StockDetailResponse = ApiResponse<StockDetailITem[]>;
+export type StockDetailResponse = ApiResponse<StockDetailItem[]>;
