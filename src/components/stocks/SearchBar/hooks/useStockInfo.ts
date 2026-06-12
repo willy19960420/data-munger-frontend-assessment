@@ -22,7 +22,7 @@ export const useStockInfo = () => {
       }
       const uniqueSet = new Set<string>();
       return data.filter((item) => {
-        const key = `${item.stock_id}-${item.stock_name}`;
+        const key = item.stock_id;
         if (uniqueSet.has(key)) {
           return false;
         }
@@ -30,7 +30,6 @@ export const useStockInfo = () => {
         return true;
       });
     },
-    retry: 2,
   });
 
   const stockOptions = useMemo(() => {

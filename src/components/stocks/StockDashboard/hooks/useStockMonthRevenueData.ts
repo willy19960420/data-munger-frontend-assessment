@@ -27,8 +27,6 @@ export const useStockMonthRevenueData = () => {
       return response.data;
     },
     enabled: selectedStock !== null && !!selectedStock.stock_id,
-    retry: 2,
-    staleTime: 1000 * 60 * 5, // 5 分鐘快取
   });
 
   return {

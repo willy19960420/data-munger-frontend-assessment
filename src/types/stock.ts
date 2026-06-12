@@ -34,3 +34,21 @@ export interface StockMonthRevenueItem {
 }
 
 export type StockDetailResponse = ApiResponse<StockMonthRevenueItem[]>;
+
+export interface StockTableColumn {
+  title: string;
+  dataIndex: string;
+  key: string;
+  fixed?: 'left' | 'right';
+}
+
+export interface StockTableRow {
+  key: 'revenue' | 'yoy';
+  name: string;
+  [monthKey: string]: string;
+}
+
+export interface UseTableDataResult {
+  columns: StockTableColumn[];
+  dataSource: StockTableRow[];
+}

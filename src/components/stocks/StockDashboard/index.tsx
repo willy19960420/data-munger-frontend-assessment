@@ -29,7 +29,7 @@ export const StockDashboard = () => {
 
   return (
     <div style={{ minHeight: '100vh', padding: '24px' }}>
-      <Spin spinning={isLoading}></Spin>
+      
       <div
         style={{
           display: 'flex',
@@ -53,36 +53,20 @@ export const StockDashboard = () => {
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <SearchBar onSelect={setSelectedStock} />
         <Divider />
-
         
-        {isEmpty && !isLoading && (
+        {isLoading ? (
+          <Spin size="large" fullscreen />
+        ) : isEmpty ? (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
             <Empty
               description={selectedStock ? '沒有找到相關數據' : '請先搜尋並選擇一支股票'}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           </div>
+        ) : (
+          <StockTable stockMonthRevenue={stockMonthRevenue} />
         )}
-
-
-        {
-          selectedStock && !isEmpty && (
-            <>
-              
-              <StockTable stockMonthRevenue={stockMonthRevenue} />
-            </>
-          )
-        }
-
         
-        
-        {/* {selectedStock && (
-          <div style={{ marginTop: '30px' }}>
-            <h2>{selectedStock.stock_name} ({selectedStock.stock_id})</h2>
-            <StockTable stock={selectedStock} />
-            <StockChart stock={selectedStock} />
-          </div>
-        )} */}
       </div>
     </div>
   );

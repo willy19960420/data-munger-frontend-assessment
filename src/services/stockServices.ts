@@ -12,7 +12,6 @@ export const StockServices = {
       );
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch Taiwan stock info:', error);
       throw error;
     }
   },
