@@ -47,6 +47,15 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
     if (selectedOption?.data) {
       onSelect(selectedOption.data);
     }
+    setSearchText('');
+    setDebouncedSearchText('');
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setSearchText('');
+      setDebouncedSearchText('');
+    }
   };
 
   return (
@@ -61,6 +70,7 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
         options={filteredOptions}
         onSearch={setSearchText}
         onChange={handleSelectChange}
+        onOpenChange={handleOpenChange}
         size="large"
         loading={isLoading}
         notFoundContent={

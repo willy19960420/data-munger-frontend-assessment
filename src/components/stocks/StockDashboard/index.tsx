@@ -6,7 +6,9 @@ import { StockChart } from '@/components/stocks/StockChart';
 import { ToggleTheme } from '@/components/toggleTheme';
 
 import { useStockMonthRevenueData } from './hooks/useStockMonthRevenueData';
-import { Divider, Spin, Empty, Button } from 'antd';
+import { Divider, Spin, Empty, Button, Typography } from 'antd';
+
+const { Title, Text } = Typography;
 
 export const StockDashboard = () => {
   const { selectedStock, setSelectedStock, stockMonthRevenue, isLoading, isEmpty, error, refetch } =
@@ -56,6 +58,14 @@ export const StockDashboard = () => {
           </div>
         ) : (
           <>
+            <div style={{ marginBottom: '8px' }}>
+              <Title level={4} style={{ margin: 0, display: 'inline' }}>
+                {selectedStock?.stock_name}
+              </Title>
+              <Text type="secondary" style={{ marginLeft: '8px', fontSize: '16px' }}>
+                ({selectedStock?.stock_id})
+              </Text>
+            </div>
             <StockChart stockMonthRevenue={stockMonthRevenue} />
             <StockTable stockMonthRevenue={stockMonthRevenue} />
           </>
