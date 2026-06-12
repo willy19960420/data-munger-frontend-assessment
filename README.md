@@ -132,7 +132,15 @@ src/
 ```bash
 npm install
 ```
+### 環境變數
 
+.env.development || .env.production
+
+| 變數 | 說明 | 必填 |
+|------|------|------|
+| `NEXT_PUBLIC_TOKEN` | FinMind API Token | 否（不填仍可使用，免費配額有限） |
+
+Token 申請：[https://finmindtrade.com/](https://finmindtrade.com/)
 ### 開發
 
 ```bash
