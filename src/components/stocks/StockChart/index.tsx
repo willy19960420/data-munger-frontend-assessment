@@ -114,6 +114,8 @@ export const StockChart = memo(({ stockMonthRevenue = [] }: StockChartProps) => 
           borderRadius: '6px',
           padding: '10px 8px 2px',
           background: 'transparent',
+          display: 'flex',
+          minWidth: 0,
         }}
       >
         <div
@@ -141,43 +143,50 @@ export const StockChart = memo(({ stockMonthRevenue = [] }: StockChartProps) => 
           %
         </div>
 
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 26, right: 30, left: 18, bottom: 10 }}>
-            <CartesianGrid stroke={token.colorBorder} strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickFormatter={(value: string) => value.slice(0, 4)}
-              interval={11}
-              minTickGap={24}
-              tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
-            />
-            <YAxis
-              yAxisId="left"
-              tickFormatter={(value: number) => formatRevenue(value)}
-              width={102}
-              domain={leftAxisDomain}
-              tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tickFormatter={(value: number) => `${value.toFixed(0)}%`}
-              width={62}
-              domain={rightAxisDomain}
-              tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
-            />
-            <Tooltip
-              formatter={(value, name) => {
-                const numericValue = typeof value === 'number' ? value : null;
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <ResponsiveContainer width="100%" height={420}>
+            <ComposedChart data={chartData} margin={{ top: 26, right: 30, left: 18, bottom: 10 }}>
+              <CartesianGrid stroke={token.colorBorder} strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickFormatter={(value: string) => value.slice(0, 4)}
+                interval={11}
+                minTickGap={24}
+                tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
+              />
+              <YAxis
+                yAxisId="left"
+                tickFormatter={(value: number) => formatRevenue(value)}
+                width={102}
+                domain={leftAxisDomain}
+                tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickFormatter={(value: number) => `${value.toFixed(0)}%`}
+                width={62}
+                domain={rightAxisDomain}
+                tick={{ fill: token.colorTextSecondary, fontSize: 12 }}
+              />
+              <Tooltip
+                formatter={(value, name) => {
+                  const numericValue = typeof value === 'number' ? value : null;
 
-                if (name === '每月營收') {
-                  return [formatRevenue(numericValue ?? 0), '每月營收'];
-                }
+                  if (name === '每月營收') {
+                    return [formatRevenue(numericValue ?? 0), '每月營收'];
+                  }
 
-                return [formatYoy(numericValue), '單月營收年增率 (%)'];
-              }}
-              labelFormatter={(label) => `月份：${label}`}
-            />
+                  return [formatYoy(numericValue), '單月營收年增率 (%)'];
+                }}
+                labelFormatter={(label) => `月份：${label}`}
+                contentStyle={{
+                  backgroundColor: token.colorBgElevated,
+                  border: `1px solid ${token.colorBorder}`,
+                  color: token.colorText,
+                  borderRadius: '4px',
+                }}
+              />
             <Bar
               yAxisId="left"
               dataKey="revenue"
@@ -199,7 +208,8 @@ export const StockChart = memo(({ stockMonthRevenue = [] }: StockChartProps) => 
               hide={!showYoy}
             />
           </ComposedChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

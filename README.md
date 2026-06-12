@@ -2,16 +2,17 @@
 
 ## 📌 Introduction
 
-台灣股票搜尋應用，基於 Next.js 和 React 構建。用戶可以搜尋台灣股票信息、查看股票詳情和圖表展示。
+台灣股票月營收分析應用，提供股票搜尋、年增率計算、混合圖表展示與詳細數據表。基於 Next.js 16 + React 19 + TypeScript 構建。
 
 ### 核心特性
 
-* ✅ **類型安全** — 完整的 TypeScript 類型定義
-* ✅ **性能優化** — React.memo + TanStack Query 智能快取
-* ✅ **容器組件模式** — 清晰的數據流和組件職責分離
-* ✅ **主題支持** — 亮/暗模式切換，Zustand 狀態管理
-* ✅ **響應式設計** — Ant Design 提供一致的 UI
-* ✅ **實時搜尋** — 搜尋框支持股票名稱和代碼搜索
+* ✅ **股票搜尋** — 虛擬滾動、250ms 防抖、實時篩選優化
+* ✅ **月營收分析** — 6年歷史數據、5年顯示窗口（60個月）
+* ✅ **YoY 計算** — 年增率百分比 (當月-去年同月)/去年同月×100
+* ✅ **混合圖表** — Bar（營收 千元）+ Line（年增率 %）雙軸展示
+* ✅ **詳細表格** — 橫向滾動、自動聚焦最新月份
+* ✅ **主題支持** — 亮/暗模式動態切換，支援 Ant Design tokens
+* ✅ **性能優化** — React.memo、共用 hooks、虛擬列表、請求快取
 
 ---
 
@@ -19,21 +20,49 @@
 
 ### 數據流
 ```
-SearchBar (useQuery 獲取)
-    ↓
-StockDashboard (容器組件，管理 selectedStock)
-    ↓
-StockTable + StockChart (React.memo 展示組件)
+SearchBar (虛擬列表 + 防抖)
+    ↓ (選擇股票)
+StockDashboard (useStockMonthRevenueData 6年資料)
+    ↓ (傳遞 stockMonthRevenue)
+useRevenueSeries (共用 hook: 6年→5年轉換、YoY計算)
+    ↙              ↘
+StockChart         StockTable
+(Bar+Line 圖表)   (月份列 + 營收/YoY 行)
 ```
 
 ### 關鍵設計決策
 
 | 特性 | 實現 | 說明 |
 |-----|------|------|
-| **數據獲取** | TanStack Query | 5 分鐘快取，自動重試 3 次 |
-| **性能優化** | React.memo | 子組件只在 prop 改變時重新渲染 |
-| **狀態管理** | Zustand + persist | 主題狀態持久化到 localStorage |
-| **API 通信** | Axios | 集中攔截器管理，Token 認證 |
+| **YoY計算** | useRevenueSeries (shared hook) | 6年→5年、年增率百分比、null-safe |
+| **數據獲取** | useStockMonthRevenueData | 6年lookback: `dayjs().subtract(6,'year')` |
+| **搜尋優化** | useStockInfo | 250ms 防抖、虛擬滾動、最多100結果 |
+| **圖表** | ComposedChart + hide prop | Bar營收+Line年增率、toggle不重算 |
+| **表格** | useTableData | series轉columns、自動滾至最新月份 |
+| **主題** | theme.useToken() | colorTextSecondary、colorBorder 無hardcode |
+
+### Hooks 組織策略
+
+```
+stocks/hooks/
+└── useRevenueSeries.ts          # 多組件共用 (StockChart + StockTable)
+
+SearchBar/hooks/
+└── useStockInfo.ts              # SearchBar 專用 (搜尋邏輯)
+
+StockTable/hooks/
+└── useTableData.ts              # StockTable 專用 (視圖映射)
+
+StockDashboard/hooks/
+└── useStockMonthRevenueData.ts  # Dashboard 專用 (資料抓取)
+
+StockChart/
+└── index.tsx                    # 無組件hook (用共用useRevenueSeries)
+```
+
+**組織原則：**
+- 多組件共用 → `stocks/hooks/`
+- 單組件專用 → `Component/hooks/`
 
 ---
 
@@ -46,142 +75,128 @@ src/
 │   ├── layout.tsx            # 根佈局
 │   └── globals.css
 ├── components/stocks/
-│   ├── SearchBar/            # 搜尋組件（useQuery 數據獲取）
-│   ├── StockDashboard/       # 容器組件（狀態管理）
-│   ├── StockTable/           # 表格展示（React.memo）
-│   └── StockChart/           # 圖表展示（React.memo）
+│   ├── hooks/
+│   │   └── useRevenueSeries.ts       # ✨ 核心：6年→5年窗口 + YoY計算
+│   ├── SearchBar/
+│   │   ├── hooks/
+│   │   │   └── useStockInfo.ts      # 搜尋數據獲取 + 防抖邏輯
+│   │   └── index.tsx                # 虛擬列表 + 防抖搜尋框
+│   ├── StockDashboard/
+│   │   ├── hooks/
+│   │   │   └── useStockMonthRevenueData.ts  # 6年月營收資料抓取
+│   │   └── index.tsx                       # 容器組件
+│   ├── StockChart/
+│   │   └── index.tsx                # Bar + Line 混合圖表、toggle控制
+│   └── StockTable/
+│       ├── hooks/
+│       │   └── useTableData.ts      # Series → 表格 columns/rows 轉換
+│       └── index.tsx                # 橫向滾動表格、自動聚焦最新
 ├── services/
 │   ├── api.ts                # Axios 實例 + 攔截器
-│   └── stockServices.ts # 股票 API 服務（Server 端 fetch）
+│   ├── apiServices.ts        # API 通用服務
+│   └── stockServices.ts      # 股票 API (getStockMonthRevenue)
 ├── stores/
-│   └── themeStore.ts         # Zustand 主題狀態
+│   └── themeStore.ts         # Zustand 主題狀態管理
 ├── types/
-│   └── stock.ts              # 股票相關類型定義
-└── providers/
-    └── index.tsx             # QueryClient + ConfigProvider
+│   └── stock.ts              # 核心類型 (StockItem, RevenueSeriesItem, etc)
+├── providers/
+│   └── index.tsx             # QueryClient + Ant ConfigProvider
+└── toggleTheme/
+    └── index.tsx             # 主題切換按鈕組件
 ```
 
 ---
 
 ## 🔧 Tech Stack
 
-### 核心
-* **Next.js 16** — React 框架
-* **React 19** — UI 庫
-* **TypeScript** — 類型安全
-
-### UI & 樣式
-* **Ant Design 6** — 企業級 UI 組件庫
-* **CSS Variables** — 主題色管理
-
-### 數據管理
-* **TanStack Query** — 服務器狀態管理（快取、同步）
-* **Zustand** — 客戶端狀態（主題）
-* **Axios** — HTTP 客戶端
-
-### 可視化
-* **Recharts** — 圖表庫（預留）
-
-### 工具
-* **Day.js** — 日期處理
+| 層級 | 技術 | 版本 |
+|-----|------|------|
+| **框架** | Next.js | 16.2.9 |
+| **UI庫** | React | 19.2.4 |
+| **語言** | TypeScript | 5 |
+| **UI組件** | Ant Design | 6.4.3 |
+| **圖表** | Recharts | 3.8.1 |
+| **狀態管理** | Zustand (主題) | 5.0.14 |
+| **數據管理** | TanStack Query | 5.101.0 |
+| **HTTP** | Axios | 1.17.0 |
+| **日期** | Day.js | 1.11.21 |
 
 ---
 
-## 🚀 快速開始
+## � 快速開始
 
-### 安裝依賴
+### 安裝
 ```bash
 npm install
 ```
 
-### 啟動開發伺服器
+### 開發
 ```bash
 npm run dev
+# 打開 http://localhost:3000
 ```
 
-打開：`http://localhost:3000`
-
-### 生產環境構建
+### 構建
 ```bash
 npm run build
 npm run start
 ```
 
----
-
-## 📝 類型定義
-
-核心類型已在 `src/types/stock.ts` 中定義：
-
-```typescript
-export interface StockItem {
-  industry_category: string;  // 產業類別
-  stock_id: string;           // 股票代碼
-  stock_name: string;         // 股票名稱
-  type: 'tpex' | 'twse';      // 交易所類型
-  date: string;               // 日期
-}
-
-export interface ApiResponse<T = StockItem[]> {
-  msg: string;                // 返回信息
-  status: number;             // HTTP 狀態碼
-  data: T;                    // 實際數據
-}
+### Lint
+```bash
+npm run lint
 ```
 
 ---
 
-## 🔌 API 集成
+## 📝 核心類型
 
-### 數據源
-- **API**: FinMind Trade API
-- **Endpoint**: `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo`
+| 類型 | 說明 |
+|------|------|
+| **StockItem** | 股票基本資訊（代碼、名稱、產業、交易所） |
+| **StockMonthRevenueItem** | 月營收數據（日期、營收、revenue_year/month） |
+| **RevenueSeriesItem** | 處理後系列（monthKey、revenue、yoy） |
 
-### 數據獲取策略
-- **SSR 頁面** → 使用 `fetch` 一次初始化（已移除，改用 Client 端）
-- **Client 組件** → 使用 `axios` + `useQuery` 進行智能快取
-
----
-
-## 🎨 主題系統
-
-主題由 Zustand 管理，支持亮/暗模式：
-
-```typescript
-useThemeStore.getState().toggleTheme()  // 切換主題
-useThemeStore.getState().setTheme('light')  // 設置特定主題
-```
-
-主題配置在 `src/providers/index.tsx` 中，Ant Design 自動應用。
+查看 [src/types/stock.ts](src/types/stock.ts) 了解完整定義。
 
 ---
 
-## 🔍 性能優化
+## 🔌 API
 
-1. **TanStack Query 快取**
-   - 5 分鐘內無需重新請求
-   - 自動重試失敗請求
-
-2. **React.memo**
-   - `StockTable` 和 `StockChart` 只在股票改變時重新渲染
-   - 避免不必要的渲染
-
-3. **useCallback**
-   - `SearchBar` 的 `fetchStockInfo` 固定引用，避免每次 render 重新創建
-
----
-
-## 📦 依賴清單
-
-| 包名 | 版本 | 用途 |
+| 功能 | 方法 | 說明 |
 |-----|------|------|
-| next | 16.2.9 | React 框架 |
-| react | 19.2.4 | UI 庫 |
-| antd | 6.4.3 | UI 組件 |
-| @tanstack/react-query | 5.101.0 | 數據狀態管理 |
-| zustand | 5.0.14 | 客戶端狀態 |
-| axios | 1.17.0 | HTTP 客戶端 |
-| recharts | 3.8.1 | 圖表庫 |
-| dayjs | 1.11.21 | 日期工具 |
+| **股票清單** | `stockServices.getStockInfo()` | 所有股票列表 |
+| **月營收** | `stockServices.getStockMonthRevenue(id, startDate)` | 6年月營收數據 |
+
+API 來源：**FinMind Trade API**
 
 ---
+
+## 🎨 主題支持
+
+支持亮/暗模式，由 Zustand 管理，在 `src/providers/index.tsx` 自動應用。
+
+```typescript
+useThemeStore.getState().toggleTheme()
+```
+
+---
+
+## ⚡ 性能優化
+
+| 最佳化 | 方案 | 效果 |
+|-------|------|------|
+| **虛擬滾動** | SearchBar Select | 1000+ 選項無卡頓 |
+| **防抖搜尋** | 250ms debounce | 降低 API 頻率 |
+| **共用 hook** | useRevenueSeries | 避免邏輯重複 |
+| **React.memo** | 展示組件 | 只在 prop 變化時重render |
+| **useMemo** | 計算results | 避免重複domain計算 |
+
+---
+
+## 💡 設計決策
+
+- **6年抓取、5年顯示** — YoY需要前一年同月參考
+- **Line connectNulls=false** — null月份自然中斷，不插值
+- **monthKey用revenue_year/month** — 準確對應營收月份（非公告日期）
+- **useRevenueSeries獨立** — 複雜邏輯+多次複用
