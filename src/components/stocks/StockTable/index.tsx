@@ -18,9 +18,7 @@ const PILL_STYLE: React.CSSProperties = {
   margin: '12px 0',
 };
 
-export const StockTable = ({
-  stockMonthRevenue = [],
-}: StockTableProps) => {
+export const StockTable = ({ stockMonthRevenue = [] }: StockTableProps) => {
   const { columns, dataSource } = useTableData(stockMonthRevenue);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const hasAutoScrolledRef = useRef(false);
@@ -88,7 +86,9 @@ export const StockTable = ({
 
   return (
     <div ref={tableWrapperRef}>
-      <Button type="primary" style={PILL_STYLE}>詳細數據</Button>
+      <Button type="primary" style={PILL_STYLE}>
+        詳細數據
+      </Button>
 
       <Table
         columns={columns}

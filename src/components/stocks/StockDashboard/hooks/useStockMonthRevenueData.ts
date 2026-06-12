@@ -10,7 +10,12 @@ import dayjs from 'dayjs';
 export const useStockMonthRevenueData = () => {
   const [selectedStock, setSelectedStock] = useState<StockItem | null>(null);
 
-  const { data:stockMonthRevenue, isLoading, error, refetch } = useQuery({
+  const {
+    data: stockMonthRevenue,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['stockDetail', selectedStock?.stock_id],
     queryFn: async () => {
       const params: StockMonthRevenueParams = {

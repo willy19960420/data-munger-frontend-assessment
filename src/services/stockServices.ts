@@ -1,5 +1,9 @@
 import api from './api';
-import type { StockInfoResponse, StockMonthRevenueParams, StockDetailResponse } from '@/types/stock';
+import type {
+  StockInfoResponse,
+  StockMonthRevenueParams,
+  StockDetailResponse,
+} from '@/types/stock';
 
 export const StockServices = {
   /**

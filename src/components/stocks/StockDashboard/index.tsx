@@ -8,18 +8,14 @@ import { ToggleTheme } from '@/components/toggleTheme';
 import { useStockMonthRevenueData } from './hooks/useStockMonthRevenueData';
 import { Divider, Spin, Empty, Button } from 'antd';
 
-
 export const StockDashboard = () => {
-
-  const { selectedStock, setSelectedStock, stockMonthRevenue, isLoading, isEmpty, error, refetch } = useStockMonthRevenueData();
+  const { selectedStock, setSelectedStock, stockMonthRevenue, isLoading, isEmpty, error, refetch } =
+    useStockMonthRevenueData();
 
   if (error) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        <Empty
-          description={'載入失敗，請稍後重試'}
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
+        <Empty description={'載入失敗，請稍後重試'} image={Empty.PRESENTED_IMAGE_SIMPLE} />
         <Button type="primary" onClick={() => refetch()}>
           重試
         </Button>
@@ -29,7 +25,6 @@ export const StockDashboard = () => {
 
   return (
     <div style={{ minHeight: '100vh', padding: '24px' }}>
-      
       <div
         style={{
           display: 'flex',
@@ -39,12 +34,8 @@ export const StockDashboard = () => {
         }}
       >
         <div>
-          <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '600' }}>
-            台灣股票查詢
-          </h1>
-          <p style={{ margin: 0, fontSize: '14px', opacity: 0.65 }}>
-            搜尋並查看股票資訊
-          </p>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '600' }}>台灣股票查詢</h1>
+          <p style={{ margin: 0, fontSize: '14px', opacity: 0.65 }}>搜尋並查看股票資訊</p>
         </div>
         <ToggleTheme />
       </div>
@@ -53,7 +44,7 @@ export const StockDashboard = () => {
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <SearchBar onSelect={setSelectedStock} />
         <Divider />
-        
+
         {isLoading ? (
           <Spin size="large" fullscreen />
         ) : isEmpty ? (
@@ -69,7 +60,6 @@ export const StockDashboard = () => {
             <StockTable stockMonthRevenue={stockMonthRevenue} />
           </>
         )}
-        
       </div>
     </div>
   );

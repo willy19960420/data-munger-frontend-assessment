@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import apiService from '@/services/apiServices';
 
-
 /**
  * 自定義 hook：獲取台灣股票資訊並去重
  */
@@ -41,12 +40,11 @@ export const useStockInfo = () => {
     }));
   }, [data]);
 
-
-  return { 
-    data, 
-    isLoading, 
+  return {
+    data,
+    isLoading,
     error,
-    
+
     stockOptions,
   };
 };

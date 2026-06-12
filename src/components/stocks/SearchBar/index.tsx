@@ -33,11 +33,13 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
       return [];
     }
 
-    return options.filter((option) => {
-      const label = option.label.toString().toLowerCase();
-      const description = option.description.toString().toLowerCase();
-      return label.includes(debouncedSearchText) || description.includes(debouncedSearchText);
-    }).slice(0, MAX_VISIBLE_OPTIONS);
+    return options
+      .filter((option) => {
+        const label = option.label.toString().toLowerCase();
+        const description = option.description.toString().toLowerCase();
+        return label.includes(debouncedSearchText) || description.includes(debouncedSearchText);
+      })
+      .slice(0, MAX_VISIBLE_OPTIONS);
   }, [options, debouncedSearchText]);
 
   const handleSelectChange = (value: string) => {
@@ -49,8 +51,9 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
 
   return (
     <Flex vertical align="center" justify="center" gap="16px" style={{ padding: '20px' }}>
-
-      {error && <Alert message="載入失敗，請稍後重試" type="error" style={{ marginBottom: '16px' }} />}
+      {error && (
+        <Alert message="載入失敗，請稍後重試" type="error" style={{ marginBottom: '16px' }} />
+      )}
       <Select
         placeholder="搜尋股票名稱或代碼..."
         virtual
@@ -61,11 +64,13 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
         size="large"
         loading={isLoading}
         notFoundContent={
-          isLoading
-            ? <Spin />
-            : debouncedSearchText && debouncedSearchText.length < 2
-              ? '請至少輸入 2 個字'
-              : '找不到股票'
+          isLoading ? (
+            <Spin />
+          ) : debouncedSearchText && debouncedSearchText.length < 2 ? (
+            '請至少輸入 2 個字'
+          ) : (
+            '找不到股票'
+          )
         }
         optionLabelProp="label"
         showSearch

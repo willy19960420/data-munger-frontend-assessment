@@ -36,9 +36,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider
         theme={{
-          algorithm: isDark
-            ? antdTheme.darkAlgorithm
-            : antdTheme.defaultAlgorithm,
+          algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
           token: {
             fontSize: 16,
             fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`,
