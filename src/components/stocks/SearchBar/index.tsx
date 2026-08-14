@@ -61,7 +61,7 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
   return (
     <Flex vertical align="center" justify="center" gap="16px" style={{ padding: '20px' }}>
       {error && (
-        <Alert message="載入失敗，請稍後重試" type="error" style={{ marginBottom: '16px' }} />
+        <Alert title="載入失敗，請稍後重試" type="error" style={{ marginBottom: '16px' }} />
       )}
       <Select
         placeholder="搜尋股票名稱或代碼..."

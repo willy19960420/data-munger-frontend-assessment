@@ -21,24 +21,38 @@
 
 ## 🏗️ 架構設計
 
-### 認證流程
+### 認證流程（跨域方案）
 
 ```
-登入頁面 (email + password)
+登入頁面 (username + password)
     ↓
 authService.login() → 儲存 tokens 到 authStore (Zustand + localStorage)
     ↓
-Axios 請求攔截器
+ProtectedLayout (Client-side 路由保護)
+  ├→ 等待 hasHydrated（避免刷新瞬間誤判）
+  ├→ 檢查 localStorage 中的 accessToken
+    ├→ 未登入 → 重定向到 /login
+  ├→ token 無效 → 先 refresh 一次
+  ├→ refresh 失敗 → 清空狀態並重定向到 /login
+    └→ 已登入訪問 /login → 重定向到 /
+    ↓
+Axios 請求攔截器（每次 API 請求）
+  ├→ 排除 stock API（不加 Bearer）
+  ├→ 排除公開 auth API（/auth、/auth/refresh）
+    ├→ 從 authStore 讀取 token
+    ├→ 加入 Authorization: Bearer {token} header
     ├→ 檢查 token 是否快過期（30秒前預檢）
     ├→ 如已過期/即將過期 → 呼叫 refresh API
     ├→ 更新 token → 重試原請求
     └→ 401 錯誤 → 自動登出 → 重定向到 /login
-    ↓
-ProtectedLayout (Client Component)
-    ├→ 檢查 accessToken
-    ├→ 未登入 → 重定向到 /login
-    └→ 已登入訪問 /login → 重定向到 /
 ```
+
+**為什麼用 localStorage 而不是 Cookie？**
+
+- 前後端跨域（不同域名）
+- localStorage 簡化跨域配置
+- ProtectedLayout 提供 Client-side 路由保護
+- Axios 攔截器自動附加 Authorization header
 
 ### 數據流
 
@@ -55,18 +69,20 @@ StockChart         StockTable
 
 ### 關鍵設計決策
 
-| 特性             | 實現                           | 說明                                          |
-| ---------------- | ------------------------------ | --------------------------------------------- |
-| **Token 管理**   | Zustand + localStorage         | 持久化儲存、自動同步、JWT 解析                |
-| **Token 刷新**   | Axios 請求攔截器               | 30 秒前預檢、自動刷新、failedQueue 防重複請求 |
-| **路由保護**     | ProtectedLayout (Client)       | 檢查 token、自動重定向、公開路由白名單        |
-| **YoY 計算**     | useRevenueSeries (shared hook) | 6 年→5 年、年增率百分比、null-safe            |
-| **數據獲取**     | useStockMonthRevenueData       | 6 年 lookback: `dayjs().subtract(6,'year')`   |
-| **搜尋優化**     | useStockInfo                   | 250ms 防抖、虛擬滾動、最多 100 結果           |
-| **圖表**         | ComposedChart + hide prop      | Bar 營收+Line 年增率、toggle 不重算          |
-| **表格**         | useTableData                   | series 轉 columns、自動滾至最新月份          |
-| **主題**         | theme.useToken()               | colorTextSecondary、colorBorder 無 hardcode   |
-| **程式碼格式化** | Prettier                       | 統一風格、自動格式化                          |
+| 特性             | 實現                           | 說明                                           |
+| ---------------- | ------------------------------ | ---------------------------------------------- |
+| **Token 管理**   | Zustand + localStorage         | 持久化儲存、自動同步、JWT 解析                 |
+| **Token 刷新**   | Axios 請求攔截器               | 30 秒前預檢、自動刷新、failedQueue 防重複請求  |
+| **刷新上限**     | ProtectedLayout + `_retry`     | 進頁 refresh 最多一次；401 重試最多一次        |
+| **攔截器排除**   | URL 白名單                     | Stock API/公開 auth API 不走 Bearer 與 refresh |
+| **路由保護**     | ProtectedLayout (Client)       | 檢查 token、自動重定向、公開路由白名單         |
+| **YoY 計算**     | useRevenueSeries (shared hook) | 6 年→5 年、年增率百分比、null-safe             |
+| **數據獲取**     | useStockMonthRevenueData       | 6 年 lookback: `dayjs().subtract(6,'year')`    |
+| **搜尋優化**     | useStockInfo                   | 250ms 防抖、虛擬滾動、最多 100 結果            |
+| **圖表**         | ComposedChart + hide prop      | Bar 營收+Line 年增率、toggle 不重算            |
+| **表格**         | useTableData                   | series 轉 columns、自動滾至最新月份            |
+| **主題**         | theme.useToken()               | colorTextSecondary、colorBorder 無 hardcode    |
+| **程式碼格式化** | Prettier                       | 統一風格、自動格式化                           |
 
 ### Hooks 組織策略
 
@@ -130,7 +146,7 @@ src/
 ├── services/
 │   ├── api.ts                # Axios 實例 + 攔截器（含 token refresh）
 │   ├── apiServices.ts        # API 通用服務
-│   ├── authService.ts        # 認證 API（login、refresh、logout）
+│   ├── authService.ts        # 認證 API（login、refresh、users、local logout）
 │   └── stockServices.ts      # 股票 API (getStockMonthRevenue)
 ├── stores/
 │   ├── authStore.ts          # Zustand 認證狀態管理（token + user）
@@ -141,9 +157,8 @@ src/
 │   └── index.ts              # 統一導出
 ├── hooks/
 │   └── useAuth.ts            # 認證 hook（login、logout）
-├── providers/
-│   └── index.tsx             # QueryClient + Ant ConfigProvider + ProtectedLayout
-└── middleware.ts             # Next.js middleware（路由保護）
+└── providers/
+    └── index.tsx             # QueryClient + Ant ConfigProvider + ProtectedLayout
 ```
 
 ---
@@ -166,7 +181,7 @@ src/
 
 ---
 
-## � 快速開始
+## 🚀 快速開始
 
 ### 安裝
 
@@ -178,10 +193,10 @@ npm install
 
 .env.development || .env.production
 
-| 變數                  | 說明              | 必填                             |
-| --------------------- | ----------------- | -------------------------------- |
-| `NEXT_PUBLIC_TOKEN`   | FinMind API Token | 否（不填仍可使用，免費配額有限） |
-| `NEXT_PUBLIC_API_URL` | 後端 API 基礎 URL | 是（認證系統需要）               |
+| 變數                  | 說明              | 必填                                   |
+| --------------------- | ----------------- | -------------------------------------- |
+| `NEXT_PUBLIC_TOKEN`   | FinMind API Token | 否（不填仍可使用，免費配額有限）       |
+| `NEXT_PUBLIC_API_URL` | 後端 API 基礎 URL | 是（refresh 與 /api/users 等後端 API） |
 
 Token 申請：[https://finmindtrade.com/](https://finmindtrade.com/)
 
@@ -212,12 +227,12 @@ npm run format
 
 ### 認證相關
 
-| 類型              | 說明                                           |
-| ----------------- | ---------------------------------------------- |
-| **User**          | 使用者資訊（id、email、name）                  |
-| **LoginRequest**  | 登入請求（email、password）                    |
-| **LoginResponse** | 登入回應（accessToken、refreshToken、user）    |
-| **AuthState**     | 認證狀態（tokens、user、loading、error、方法） |
+| 類型              | 說明                                                      |
+| ----------------- | --------------------------------------------------------- |
+| **User**          | 使用者資訊（username、role）                              |
+| **LoginRequest**  | 登入請求（username、password）                            |
+| **LoginResponse** | 登入回應（accessToken、refreshToken、tokenExpires、user） |
+| **AuthState**     | 認證狀態（tokens、user、loading、error、方法）            |
 
 ### 股票相關
 
@@ -235,11 +250,53 @@ npm run format
 
 ### 認證 API
 
-| 功能           | 方法                         | 說明                             |
-| -------------- | ---------------------------- | -------------------------------- |
-| **登入**       | `authService.loginService()` | 使用者登入，返回 tokens 和 user  |
-| **刷新 Token** | `authService.refreshToken()` | 刷新 accessToken                 |
-| **登出**       | `authService.logoutService()`| 登出並清除狀態                   |
+| 功能               | 方法                                | 說明                                     |
+| ------------------ | ----------------------------------- | ---------------------------------------- |
+| **登入**           | `authService.loginService()`        | 使用者登入，返回 tokens 和 user          |
+| **刷新 Token**     | `authService.refreshTokenService()` | 刷新 accessToken                         |
+| **取得使用者列表** | `authService.getUserListService()`  | 取得 `/api/users` 受保護資料             |
+| **登出（本地）**   | `authService.logoutService()`       | 清空 token/user 並回登入頁（不呼叫 API） |
+
+登入端點：
+
+`POST https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws/auth`
+
+登入請求 body：
+
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+登入成功回傳（HTTP 200）：
+
+```json
+{
+  "access_token": "string",
+  "refresh_token": "string",
+  "expires_in": 300,
+  "user": {
+    "username": "string",
+    "role": "string"
+  }
+}
+```
+
+登入失敗回傳：
+
+```json
+{
+  "message": "string",
+  "code": 415
+}
+```
+
+說明：
+
+- 除了 200 以外都會有 `message`
+- `code` 欄位只會在 415 狀態出現
 
 ### 股票 API
 
@@ -249,7 +306,9 @@ npm run format
 | **月營收**   | `stockServices.getStockMonthRevenue(id, startDate)` | 6 年月營收數據 |
 
 API 來源：
-- 認證 API：**自定義後端**（需設定 NEXT_PUBLIC_API_URL）
+
+- 認證 API（登入）：**固定端點** `https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws/auth`
+- 認證 API（refresh/users）：**自定義後端**（由 NEXT_PUBLIC_API_URL 提供）
 - 股票 API：**FinMind Trade API**
 
 ---
@@ -266,35 +325,43 @@ useThemeStore.getState().toggleTheme();
 
 ## ⚡ 性能優化
 
-| 最佳化             | 方案                | 效果                        |
-| ------------------ | ------------------- | --------------------------- |
-| **Token 預檢**     | 30 秒前檢查過期     | 避免請求中斷、提前刷新      |
-| **Token 持久化**   | localStorage        | 刷新頁面保持登入狀態        |
-| **請求隊列**       | failedQueue         | 防止 token 刷新時重複請求   |
-| **虛擬滾動**       | SearchBar Select    | 1000+ 選項無卡頓            |
-| **防抖搜尋**       | 250ms debounce      | 降低 API 頻率               |
-| **共用 hook**      | useRevenueSeries    | 避免邏輯重複                |
-| **React.memo**     | 展示組件            | 只在 prop 變化時重 render   |
-| **useMemo**        | 計算 results        | 避免重複 domain 計算        |
-| **React Query 快取**| TanStack Query     | 減少重複請求、智能快取管理  |
+| 最佳化               | 方案             | 效果                       |
+| -------------------- | ---------------- | -------------------------- |
+| **Token 預檢**       | 30 秒前檢查過期  | 避免請求中斷、提前刷新     |
+| **Token 持久化**     | localStorage     | 刷新頁面保持登入狀態       |
+| **請求隊列**         | failedQueue      | 防止 token 刷新時重複請求  |
+| **虛擬滾動**         | SearchBar Select | 1000+ 選項無卡頓           |
+| **防抖搜尋**         | 250ms debounce   | 降低 API 頻率              |
+| **共用 hook**        | useRevenueSeries | 避免邏輯重複               |
+| **React.memo**       | 展示組件         | 只在 prop 變化時重 render  |
+| **useMemo**          | 計算 results     | 避免重複 domain 計算       |
+| **React Query 快取** | TanStack Query   | 減少重複請求、智能快取管理 |
 
 ---
 
 ## 💡 設計決策
 
-### 認證系統
+### 認證系統（跨域方案）
+
+- **localStorage 而非 Cookie** — 前後端跨域，避免複雜的 CORS 和 SameSite 設定
+- **Hydration 保護** — 先等 hasHydrated，再做登入判斷，避免 F5 後誤踢登入
+- **Client-side 路由保護** — ProtectedLayout 檢查 localStorage token，自動重定向
+- **刷新一次策略** — token 無效時先 refresh 一次，失敗才登出回登入
+- **Authorization Header** — Axios 攔截器自動附加 `Authorization: Bearer {token}`
 - **Token 預檢機制** — 請求前 30 秒檢查過期，主動刷新避免 401 錯誤
 - **JWT 解析** — 使用 jwt-decode 解析 exp 欄位，準確計算過期時間
 - **請求隊列** — Token 刷新期間，pending 請求放入 failedQueue 等待
-- **localStorage 持久化** — 使用 Zustand persist 中介軟體，跨頁面保持登入狀態
-- **Client-side 路由保護** — ProtectedLayout 在客戶端檢查 token，自動重定向
+- **攔截器排除策略** — Stock API 與公開 auth API 不套用 Bearer/refresh，避免循環刷新
+- **Zustand 持久化** — persist 中介軟體自動同步 localStorage，跨頁面保持登入
 
 ### 股票系統
+
 - **6 年抓取、5 年顯示** — YoY 需要前一年同月參考
 - **Line connectNulls=false** — null 月份自然中斷，不插值
 - **monthKey 用 revenue_year/month** — 準確對應營收月份（非公告日期）
 - **useRevenueSeries 獨立** — 複雜邏輯+多次複用
 
 ### 開發體驗
+
 - **移除 ESLint** — 簡化配置，只保留 Prettier 格式化
 - **統一 import** — types/index.ts 統一導出，簡化 import 路徑

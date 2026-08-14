@@ -10,6 +10,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       tokenExpires: null, // ISO string
       user: null,
+      hasHydrated: false,
       isLoading: false,
       error: null,
 
@@ -26,6 +27,8 @@ export const useAuthStore = create<AuthState>()(
       setLoading: (isLoading) => set({ isLoading }),
 
       setError: (error) => set({ error }),
+
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
 
       logout: () =>
         set({
@@ -104,6 +107,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       // 只持久化token和user，不持久化loading和error
       partialize: (state) => ({
         accessToken: state.accessToken,

@@ -89,14 +89,11 @@ export default function LoginPage() {
                 style={{ marginTop: 32 }}
               >
                 <Form.Item
-                  label="電子郵件"
-                  name="email"
-                  rules={[
-                    { required: true, message: '請輸入電子郵件' },
-                    { type: 'email', message: '請輸入有效的電子郵件' },
-                  ]}
+                  label="帳號"
+                  name="username"
+                  rules={[{ required: true, message: '請輸入帳號' }]}
                 >
-                  <Input prefix={<UserOutlined />} placeholder="請輸入電子郵件" />
+                  <Input prefix={<UserOutlined />} placeholder="請輸入帳號" />
                 </Form.Item>
 
                 <Form.Item

@@ -26,7 +26,7 @@ export function LogoutButton() {
     <>
       {contextHolder}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span>{user?.name}</span>
+        <span>{user?.username}</span>
         <Button type="primary" danger icon={<LogoutOutlined />} onClick={handleLogout}>
           登出
         </Button>

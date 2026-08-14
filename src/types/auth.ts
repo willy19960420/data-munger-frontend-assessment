@@ -4,16 +4,15 @@
  * 使用者資訊型別
  */
 export interface User {
-  id: string;
-  email: string;
-  name: string;
+  username: string;
+  role: string;
 }
 
 /**
  * 登入請求
  */
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -25,13 +24,6 @@ export interface LoginResponse {
   refreshToken: string;
   tokenExpires?: string; // ISO string，token過期時間（可選）
   user: User;
-}
-
-/**
- * 刷新Token請求
- */
-export interface RefreshTokenRequest {
-  refreshToken: string;
 }
 
 /**
@@ -52,6 +44,7 @@ export interface AuthState {
   refreshToken: string | null;
   tokenExpires: string | null; // ISO string，token過期時間
   user: User | null;
+  hasHydrated: boolean;
   isLoading: boolean;
   error: string | null;
 
@@ -60,6 +53,7 @@ export interface AuthState {
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setHasHydrated: (hydrated: boolean) => void;
   logout: () => void;
   clearError: () => void;
 
@@ -75,7 +69,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
   error: string | null;
   clearError: () => void;
