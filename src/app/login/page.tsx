@@ -22,7 +22,7 @@ export default function LoginPage() {
       setError(null);
       await loginService(values);
       messageApi.success('登入成功');
-      setTimeout(() => router.push('/'), 500);
+      setTimeout(() => router.push('/cms/stock'), 500);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || '登入失敗';
       setError(errorMsg);

@@ -65,10 +65,12 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
       )}
       <Select
         placeholder="搜尋股票名稱或代碼..."
-        virtual
-        filterOption={false}
+        virtual={false}
+        showSearch={{
+          onSearch: setSearchText,
+          filterOption: false,
+        }}
         options={filteredOptions}
-        onSearch={setSearchText}
         onChange={handleSelectChange}
         onOpenChange={handleOpenChange}
         size="large"
@@ -83,7 +85,6 @@ export const SearchBar = ({ onSelect }: SearchBarProps) => {
           )
         }
         optionLabelProp="label"
-        showSearch
         style={{ width: '100%', maxWidth: '400px' }}
       />
     </Flex>

@@ -4,7 +4,7 @@ import type { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types/
 import { jwtDecode } from 'jwt-decode';
 
 const LOGIN_API_URL =
-  'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws/auth';
+  'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws/';
 
 type ApiLoginSuccessResponse = {
   access_token: string;
@@ -54,7 +54,7 @@ export const loginService = async (data: LoginRequest): Promise<LoginResponse> =
   let response;
 
   try {
-    response = await api.post<ApiLoginSuccessResponse>(LOGIN_API_URL, data);
+    response = await api.post<ApiLoginSuccessResponse>(`${LOGIN_API_URL}/auth/refresh`, data);
   } catch (error: any) {
     throw new Error(toApiErrorMessage(error));
   }
@@ -92,7 +92,7 @@ export const refreshTokenService = async (): Promise<RefreshTokenResponse> => {
     throw new Error('No refresh token available');
   }
 
-  const response = await api.post('/auth/refresh', {
+  const response = await api.post(`${LOGIN_API_URL}/auth/refresh`, {
     refreshToken,
   });
 

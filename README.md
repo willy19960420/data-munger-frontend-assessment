@@ -34,7 +34,7 @@ ProtectedLayout (Client-side 路由保護)
     ├→ 未登入 → 重定向到 /login
   ├→ token 無效 → 先 refresh 一次
   ├→ refresh 失敗 → 清空狀態並重定向到 /login
-    └→ 已登入訪問 /login → 重定向到 /
+    └→ 已登入訪問 /login → 重定向到 /cms/stock
     ↓
 Axios 請求攔截器（每次 API 請求）
   ├→ 排除 stock API（不加 Bearer）
@@ -115,11 +115,17 @@ StockChart/
 ```
 src/
 ├── app/
-│   ├── page.tsx              # 主頁（Server Component）
+│   ├── page.tsx              # 首頁重定向到 /cms/stock
 │   ├── layout.tsx            # 根佈局
 │   ├── globals.css
 │   └── login/
 │       └── page.tsx          # 登入頁面
+│   └── cms/
+│       ├── layout.tsx        # CMS 頂部選單版面（Stock/UserList）
+│       ├── stock/
+│       │   └── page.tsx      # 股票儀表板頁面
+│       └── userList/
+│           └── page.tsx      # 使用者列表頁面
 ├── components/
 │   ├── auth/
 │   │   ├── ProtectedLayout.tsx   # 路由保護組件
@@ -360,6 +366,14 @@ useThemeStore.getState().toggleTheme();
 - **Line connectNulls=false** — null 月份自然中斷，不插值
 - **monthKey 用 revenue_year/month** — 準確對應營收月份（非公告日期）
 - **useRevenueSeries 獨立** — 複雜邏輯+多次複用
+
+### API 封裝與錯誤處理（分域 Adapter）
+
+- **不強制統一後端格式** — Auth API 與 Stock API（FinMind）回傳結構不同，直接硬統一會提高耦合
+- **在 Service 層做分域轉換** — 各自處理欄位映射與錯誤訊息（例如 auth 的 `access_token` → `accessToken`）
+- **UI 層只依賴穩定型別** — 畫面不直接耦合後端原始 payload，降低 API 變動風險
+- **錯誤訊息一致輸出** — 在各自服務內 normalize 成可顯示訊息，搭配通知與 Query error 呈現
+- **可演進策略** — 未來若 API 收斂，再抽共用錯誤模型，不影響現有頁面
 
 ### 開發體驗
 

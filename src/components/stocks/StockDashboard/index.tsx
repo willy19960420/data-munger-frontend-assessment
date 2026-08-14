@@ -3,7 +3,6 @@
 import { SearchBar } from '@/components/stocks/SearchBar';
 import { StockTable } from '@/components/stocks/StockTable';
 import { StockChart } from '@/components/stocks/StockChart';
-import { ToggleTheme } from '@/components/toggleTheme';
 
 import { useStockMonthRevenueData } from './hooks/useStockMonthRevenueData';
 import { Divider, Spin, Empty, Button, Typography } from 'antd';
@@ -39,7 +38,6 @@ export const StockDashboard = () => {
           <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '600' }}>台灣股票查詢</h1>
           <p style={{ margin: 0, fontSize: '14px', opacity: 0.65 }}>搜尋並查看股票資訊</p>
         </div>
-        <ToggleTheme />
       </div>
 
       {/* Main Content */}

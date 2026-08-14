@@ -37,7 +37,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
       // token 有效，直接放行
       if (isTokenValid(30 * 1000)) {
         if (isPublicRoute) {
-          router.replace('/');
+          router.replace('/cms/stock');
           return;
         }
 
@@ -54,7 +54,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
         await refreshTokenService();
 
         if (isPublicRoute) {
-          router.replace('/');
+          router.replace('/cms/stock');
           return;
         }
 
