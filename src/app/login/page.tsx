@@ -6,7 +6,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { loginService } from '@/services/authService';
 import { useAuthStore } from '@/stores/authStore';
 import type { LoginRequest } from '@/types/auth';
-import { ToggleTheme } from '@/components/ToggleTheme2';
+import { ToggleTheme } from '@/components/ToggleTheme';
 
 const { Title } = Typography;
 

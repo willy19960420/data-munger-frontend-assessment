@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Layout, Menu, Button, Typography, message } from 'antd';
 import type { MenuProps } from 'antd';
 import { AppstoreOutlined, TeamOutlined, LogoutOutlined } from '@ant-design/icons';
-import { ToggleTheme } from '@/components/ToggleTheme2';
+import { ToggleTheme } from '@/components/ToggleTheme';
 import { logoutService } from '@/services/authService';
 
 const { Header, Content } = Layout;
