@@ -88,11 +88,6 @@ api.interceptors.request.use(
 
     const { accessToken, isTokenValid } = useAuthStore.getState();
 
-    // 如果沒有token，直接通過
-    if (!accessToken) {
-      return config;
-    }
-
     // 檢查token是否有效（30秒緩衝）
     if (!isTokenValid(30 * 1000)) {
       // Token無效或即將過期，嘗試刷新

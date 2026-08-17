@@ -14,6 +14,12 @@ type ApiLoginSuccessResponse = {
   };
 };
 
+type ApiRefreshSuccessResponse = {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+};
+
 type ApiErrorResponse = {
   message?: string;
   code?: number;
@@ -96,14 +102,11 @@ export const refreshTokenService = async (): Promise<RefreshTokenResponse> => {
 
   const data = response.data as
     | RefreshTokenResponse
-    | {
-        access_token?: string;
-        refresh_token?: string;
-        expires_in?: number;
-      };
+    | ApiRefreshSuccessResponse;
 
   const accessToken = 'accessToken' in data ? data.accessToken : data.access_token;
-  const newRefreshToken = 'refreshToken' in data ? data.refreshToken : data.refresh_token;
+  // 依目前後端規格，refresh 回應通常不帶 refresh_token，沿用原值。
+  const newRefreshToken = ('refreshToken' in data ? data.refreshToken : data.refresh_token) || refreshToken;
   const expiresIn = 'expires_in' in data ? data.expires_in : undefined;
   const tokenExpires =
     'tokenExpires' in data
@@ -112,8 +115,8 @@ export const refreshTokenService = async (): Promise<RefreshTokenResponse> => {
         ? new Date(Date.now() + expiresIn * 1000).toISOString()
         : undefined;
 
-  if (!accessToken || !newRefreshToken) {
-    throw new Error('Invalid refresh token response');
+  if (!accessToken) {
+    throw new Error('Invalid refresh token response: access token missing');
   }
 
   // 如果後端沒有返回tokenExpires，嘗試從token decode
