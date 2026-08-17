@@ -1,8 +1,8 @@
 'use client';
 
-import { SearchBar } from '@/components/stocks/SearchBar';
-import { StockTable } from '@/components/stocks/StockTable';
-import { StockChart } from '@/components/stocks/StockChart';
+import { SearchBar } from '@/components/Stocks/SearchBar';
+import { StockTable } from '@/components/Stocks/StockTable';
+import { StockChart } from '@/components/Stocks/StockChart';
 
 import { useStockMonthRevenueData } from './hooks/useStockMonthRevenueData';
 import { Divider, Spin, Empty, Button, Typography } from 'antd';

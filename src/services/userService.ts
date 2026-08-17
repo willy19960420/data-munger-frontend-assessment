@@ -1,18 +1,20 @@
 import api from './api';
+
 import type {
-  StockInfoResponse,
-  StockMonthRevenueParams,
-  StockDetailResponse,
-} from '@/types/stock';
+	GetUserListResponse,
+	UserListRequest,
+} from '@/types/user';
+
+const defaultPath = 'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws';
 
 export const UserService = {
   /**
    * 獲取User的詳細信息
    */
-  async getUserList(params: StockMonthRevenueParams): Promise<StockDetailResponse> {
+  async getUserList(params: UserListRequest): Promise<GetUserListResponse> {
     try {
-      const response = await api.get<StockDetailResponse>(
-        '',
+      const response = await api.get<GetUserListResponse>(
+        `${defaultPath}/api/users`,
         { params }
       );
       return response.data;

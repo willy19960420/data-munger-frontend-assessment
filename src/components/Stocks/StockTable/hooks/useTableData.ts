@@ -5,7 +5,7 @@ import type {
   StockTableRow,
   UseTableDataResult,
 } from '@/types/stock';
-import { useRevenueSeries } from '@/components/stocks/hooks/useRevenueSeries';
+import { useRevenueSeries } from '@/components/Stocks/hooks/useRevenueSeries';
 
 export const useTableData = (
   stockMonthRevenue: StockMonthRevenueItem[] = []
