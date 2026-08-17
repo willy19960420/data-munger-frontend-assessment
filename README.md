@@ -1,216 +1,183 @@
-# Data Munger Frontend Assessment
+﻿# Data Munger Frontend Assessment
 
-## 📌 Introduction
+台灣股票月營收分析與使用者列表的前端專案，使用 Next.js 16、React 19、TypeScript、Ant Design、TanStack Query、Zustand。
 
-台灣股票月營收分析應用，提供股票搜尋、年增率計算、混合圖表展示與詳細數據表。基於 Next.js 16 + React 19 + TypeScript 構建。
+## 功能重點
 
-### 核心特性
+- JWT 登入/刷新流程（logout 為前端本地登出）
+- 路由保護（ProtectedLayout）
+- Axios 攔截器自動附加 Bearer Token
+- Token 過期前預檢與 refresh queue 防重複刷新
+- 股票搜尋與月營收圖表（Recharts）
+- User List 查詢與分頁
+- User List 表格欄位完整顯示（含 Avatar）
+- 欄位資料缺漏時統一顯示 `-`
+- `created_at` 時間格式統一為 `YYYY-MM-DD HH:mm:ss`
 
-- ✅ **股票搜尋** — 虛擬滾動、250ms 防抖、實時篩選優化
-- ✅ **月營收分析** — 6年歷史數據、5年顯示窗口（60個月）
-- ✅ **YoY 計算** — 年增率百分比 (當月-去年同月)/去年同月×100
-- ✅ **混合圖表** — Bar（營收 千元）+ Line（年增率 %）雙軸展示
-- ✅ **詳細表格** — 橫向滾動、自動聚焦最新月份
-- ✅ **主題支持** — 亮/暗模式動態切換，支援 Ant Design tokens
-- ✅ **性能優化** — React.memo、共用 hooks、虛擬列表、請求快取
+## 技術棧
 
----
+- Next.js 16.3.0
+- React 19.2.4
+- TypeScript 5
+- Ant Design 6.4.3
+- TanStack Query 5.101.0
+- Axios 1.17.0
+- Zustand 5.0.14
+- Recharts 3.8.1
+- Day.js 1.11.21
 
-## 🏗️ 架構設計
+## 專案結構（目前，已對照實際檔案）
 
-### 數據流
-
-```
-SearchBar (虛擬列表 + 防抖)
-    ↓ (選擇股票)
-StockDashboard (useStockMonthRevenueData 6年資料)
-    ↓ (傳遞 stockMonthRevenue)
-useRevenueSeries (共用 hook: 6年→5年轉換、YoY計算)
-    ↙              ↘
-StockChart         StockTable
-(Bar+Line 圖表)   (月份列 + 營收/YoY 行)
-```
-
-### 關鍵設計決策
-
-| 特性         | 實現                           | 說明                                       |
-| ------------ | ------------------------------ | ------------------------------------------ |
-| **YoY計算**  | useRevenueSeries (shared hook) | 6年→5年、年增率百分比、null-safe           |
-| **數據獲取** | useStockMonthRevenueData       | 6年lookback: `dayjs().subtract(6,'year')`  |
-| **搜尋優化** | useStockInfo                   | 250ms 防抖、虛擬滾動、最多100結果          |
-| **圖表**     | ComposedChart + hide prop      | Bar營收+Line年增率、toggle不重算           |
-| **表格**     | useTableData                   | series轉columns、自動滾至最新月份          |
-| **主題**     | theme.useToken()               | colorTextSecondary、colorBorder 無hardcode |
-
-### Hooks 組織策略
-
-```
-stocks/hooks/
-└── useRevenueSeries.ts          # 多組件共用 (StockChart + StockTable)
-
-SearchBar/hooks/
-└── useStockInfo.ts              # SearchBar 專用 (搜尋邏輯)
-
-StockTable/hooks/
-└── useTableData.ts              # StockTable 專用 (視圖映射)
-
-StockDashboard/hooks/
-└── useStockMonthRevenueData.ts  # Dashboard 專用 (資料抓取)
-
-StockChart/
-└── index.tsx                    # 無組件hook (用共用useRevenueSeries)
-```
-
-**組織原則：**
-
-- 多組件共用 → `stocks/hooks/`
-- 單組件專用 → `Component/hooks/`
-
----
-
-## 📁 文件夾結構
-
-```
+```text
 src/
-├── app/
-│   ├── page.tsx              # 主頁（Server Component）
-│   ├── layout.tsx            # 根佈局
-│   └── globals.css
-├── components/stocks/
-│   ├── hooks/
-│   │   └── useRevenueSeries.ts       # ✨ 核心：6年→5年窗口 + YoY計算
-│   ├── SearchBar/
-│   │   ├── hooks/
-│   │   │   └── useStockInfo.ts      # 搜尋數據獲取 + 防抖邏輯
-│   │   └── index.tsx                # 虛擬列表 + 防抖搜尋框
-│   ├── StockDashboard/
-│   │   ├── hooks/
-│   │   │   └── useStockMonthRevenueData.ts  # 6年月營收資料抓取
-│   │   └── index.tsx                       # 容器組件
-│   ├── StockChart/
-│   │   └── index.tsx                # Bar + Line 混合圖表、toggle控制
-│   └── StockTable/
-│       ├── hooks/
-│       │   └── useTableData.ts      # Series → 表格 columns/rows 轉換
-│       └── index.tsx                # 橫向滾動表格、自動聚焦最新
-├── services/
-│   ├── api.ts                # Axios 實例 + 攔截器
-│   ├── apiServices.ts        # API 通用服務
-│   └── stockServices.ts      # 股票 API (getStockMonthRevenue)
-├── stores/
-│   └── themeStore.ts         # Zustand 主題狀態管理
-├── types/
-│   └── stock.ts              # 核心類型 (StockItem, RevenueSeriesItem, etc)
-├── providers/
-│   └── index.tsx             # QueryClient + Ant ConfigProvider
-└── toggleTheme/
-    └── index.tsx             # 主題切換按鈕組件
+  app/
+    cms/
+      stock/page.tsx
+      userList/page.tsx
+    login/page.tsx
+    layout.tsx
+    page.tsx
+  components/
+    Auth/
+      LogoutButton.tsx
+      ProtectedLayout.tsx
+    Stocks/
+      hooks/useRevenueSeries.ts
+      SearchBar/
+      StockChart/
+      StockDashboard/
+      StockTable/
+    ToggleTheme/
+      index.tsx
+    UserList/
+      DetailTable/
+      QueryOptions/
+  hooks/
+    useAuth.ts
+    useTablePaginationParams.ts
+  providers/
+    index.tsx
+  services/
+    api.ts
+    apiServices.ts
+    authService.ts
+    constants.ts
+    stockServices.ts
+    userService.ts
+  stores/
+    authStore.ts
+    themeStore.ts
+  types/
+    auth.ts
+    stock.ts
+    user.ts
 ```
 
----
+## 認證與請求流程（完整）
 
-## 🔧 Tech Stack
+1. 使用者於 `/login` 送出帳密。
+2. `loginService(data)` 呼叫 `POST /auth`，拿到 `access_token`、`refresh_token`、`expires_in`。
+3. 前端將 token 正規化後寫入 `authStore`。
+4. 進入 CMS 路由後，受保護請求由 `api.ts` 攔截器自動加上 `Authorization: Bearer ...`。
+5. 若 token 即將過期，攔截器會先呼叫 `refreshTokenService()`。
+6. refresh 成功後，更新 store 中 token，再重試原請求。
+7. refresh 失敗或 401 無法恢復時，清空本地認證狀態並導回 `/login`。
 
-| 層級         | 技術           | 版本    |
-| ------------ | -------------- | ------- |
-| **框架**     | Next.js        | 16.2.9  |
-| **UI庫**     | React          | 19.2.4  |
-| **語言**     | TypeScript     | 5       |
-| **UI組件**   | Ant Design     | 6.4.3   |
-| **圖表**     | Recharts       | 3.8.1   |
-| **狀態管理** | Zustand (主題) | 5.0.14  |
-| **數據管理** | TanStack Query | 5.101.0 |
-| **HTTP**     | Axios          | 1.17.0  |
-| **日期**     | Day.js         | 1.11.21 |
+補充：本專案沒有 `logout API`，登出是前端本地行為。
 
----
+## API URL 策略（目前）
 
-## � 快速開始
+專案目前採用「完整 URL」策略。
 
-### 安裝
+- 各 service 直接呼叫完整 URL
+- `api.ts` 不使用 `baseURL`
+- `src/services/constants.ts` 統一定義：
+  - `USER_LOGIN_API_URL`
+  - `STOCK_API_URL`
+  - `LOGIN_API_HOST`
+  - `STOCK_API_HOST`
+
+`LOGIN_API_HOST`、`STOCK_API_HOST` 用於攔截器中判斷哪些請求要略過 Bearer/refresh 流程。
+
+## Service 對照
+
+### Auth
+
+- `loginService(data)`
+- `refreshTokenService()`
+- `logoutService()`
+
+`logoutService()` 說明：
+- 只清除 `authStore` 的 `accessToken`、`refreshToken`、`tokenExpires`、`user`
+- 不會呼叫任何後端 API
+- 實際導頁到 `/login` 的行為在 `src/app/cms/layout.tsx` 的 `onLogout` 中執行
+
+來源檔案：`src/services/authService.ts`
+
+### User
+
+- `UserService.getUserList(params)`
+
+來源檔案：`src/services/userService.ts`
+
+### Stock
+
+- `StockServices.getTaiwanStockInfo()`
+- `StockServices.getStockMonthRevenue(params)`
+
+來源檔案：`src/services/stockServices.ts`
+
+### API Service 聚合
+
+- `apiService.stock` -> `stockServices`（來自 `src/services/stockServices.ts`）
+- `apiService.user` -> `UserService`（來自 `src/services/userService.ts`）
+
+來源檔案：`src/services/apiServices.ts`
+
+## User List 回傳格式（範例）
+
+```json
+{
+  "id": 1,
+  "name": "Alice Johnson",
+  "email": "alice.johnson@example.com",
+  "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
+  "status": "active",
+  "created_at": "2024-01-15T08:30:00Z"
+}
+```
+
+對應表格欄位：`id`、`name`、`email`、`avatar`、`status`、`created_at`。
+
+## 環境變數
+
+目前程式碼實際使用的公開環境變數：
+
+- `NEXT_PUBLIC_TOKEN`（可選）
+  - 供 FinMind API 使用
+
+## 開發指令
 
 ```bash
 npm install
-```
-### 環境變數
-
-.env.development || .env.production
-
-| 變數 | 說明 | 必填 |
-|------|------|------|
-| `NEXT_PUBLIC_TOKEN` | FinMind API Token | 否（不填仍可使用，免費配額有限） |
-
-Token 申請：[https://finmindtrade.com/](https://finmindtrade.com/)
-### 開發
-
-```bash
 npm run dev
-# 打開 http://localhost:3000
-```
-
-### 構建
-
-```bash
 npm run build
 npm run start
-```
-
-### Lint
-
-```bash
 npm run lint
+npm run format
 ```
 
----
+## 備註
 
-## 📝 核心類型
+- 目前無 `middleware.ts`；路由保護由 `ProtectedLayout` 處理。
+- Auth API 目前只有兩支：`POST /auth`、`POST /auth/refresh`。
+- `logoutService()` 是 local-only，不是 API endpoint。
+- 文件內容已依當前程式碼更新，若後續調整 API 結構，請同步更新本 README。
 
-| 類型                      | 說明                                         |
-| ------------------------- | -------------------------------------------- |
-| **StockItem**             | 股票基本資訊（代碼、名稱、產業、交易所）     |
-| **StockMonthRevenueItem** | 月營收數據（日期、營收、revenue_year/month） |
-| **RevenueSeriesItem**     | 處理後系列（monthKey、revenue、yoy）         |
+## Auth API 對照（以目前實作為準）
 
-查看 [src/types/stock.ts](src/types/stock.ts) 了解完整定義。
-
----
-
-## 🔌 API
-
-| 功能         | 方法                                                | 說明          |
-| ------------ | --------------------------------------------------- | ------------- |
-| **股票清單** | `stockServices.getStockInfo()`                      | 所有股票列表  |
-| **月營收**   | `stockServices.getStockMonthRevenue(id, startDate)` | 6年月營收數據 |
-
-API 來源：**FinMind Trade API**
-
----
-
-## 🎨 主題支持
-
-支持亮/暗模式，由 Zustand 管理，在 `src/providers/index.tsx` 自動應用。
-
-```typescript
-useThemeStore.getState().toggleTheme();
-```
-
----
-
-## ⚡ 性能優化
-
-| 最佳化         | 方案             | 效果                     |
-| -------------- | ---------------- | ------------------------ |
-| **虛擬滾動**   | SearchBar Select | 1000+ 選項無卡頓         |
-| **防抖搜尋**   | 250ms debounce   | 降低 API 頻率            |
-| **共用 hook**  | useRevenueSeries | 避免邏輯重複             |
-| **React.memo** | 展示組件         | 只在 prop 變化時重render |
-| **useMemo**    | 計算results      | 避免重複domain計算       |
-
----
-
-## 💡 設計決策
-
-- **6年抓取、5年顯示** — YoY需要前一年同月參考
-- **Line connectNulls=false** — null月份自然中斷，不插值
-- **monthKey用revenue_year/month** — 準確對應營收月份（非公告日期）
-- **useRevenueSeries獨立** — 複雜邏輯+多次複用
+| 功能 | 方法 | 實作位置 | 備註 |
+| --- | --- | --- | --- |
+| Login | `POST ${USER_LOGIN_API_URL}/auth` | `src/services/authService.ts` -> `loginService` | 呼叫後端登入 |
+| Refresh | `POST ${USER_LOGIN_API_URL}/auth/refresh` | `src/services/authService.ts` -> `refreshTokenService` | 使用 refresh token 換新 token |
+| Logout | 無 API | `src/services/authService.ts` -> `logoutService` | 僅清本地狀態 |

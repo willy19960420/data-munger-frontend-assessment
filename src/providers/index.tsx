@@ -4,6 +4,7 @@ import React, { useState, useLayoutEffect } from 'react';
 import { ConfigProvider, theme as antdTheme, App as AntApp } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useThemeStore } from '@/stores/themeStore';
+import { ProtectedLayout } from '@/components/Auth/ProtectedLayout';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeStore((state) => state.theme);
@@ -50,7 +51,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       >
-        <AntApp>{children}</AntApp>
+        <AntApp>
+          <ProtectedLayout>{children}</ProtectedLayout>
+        </AntApp>
       </ConfigProvider>
     </QueryClientProvider>
   );

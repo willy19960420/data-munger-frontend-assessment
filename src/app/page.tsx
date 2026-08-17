@@ -1,5 +1,5 @@
-import { StockDashboard } from '@/components/stocks/StockDashboard';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <StockDashboard />;
+  redirect('/cms/stock');
 }

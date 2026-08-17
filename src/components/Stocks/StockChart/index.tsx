@@ -3,7 +3,7 @@
 import { memo, useMemo, useState } from 'react';
 import { Button, Flex, theme } from 'antd';
 import type { StockMonthRevenueItem } from '@/types/stock';
-import { useRevenueSeries } from '@/components/stocks/hooks/useRevenueSeries';
+import { useRevenueSeries } from '@/components/Stocks/hooks/useRevenueSeries';
 import {
   ResponsiveContainer,
   ComposedChart,
