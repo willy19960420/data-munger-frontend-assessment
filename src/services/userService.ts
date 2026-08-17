@@ -4,8 +4,7 @@ import type {
 	GetUserListResponse,
 	UserListRequest,
 } from '@/types/user';
-
-const defaultPath = 'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws';
+import { USER_LOGIN_API_URL } from './constants';
 
 export const UserService = {
   /**
@@ -14,7 +13,7 @@ export const UserService = {
   async getUserList(params: UserListRequest): Promise<GetUserListResponse> {
     try {
       const response = await api.get<GetUserListResponse>(
-        `${defaultPath}/api/users`,
+        `${USER_LOGIN_API_URL}/api/users`,
         { params }
       );
       return response.data;

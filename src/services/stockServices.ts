@@ -4,6 +4,7 @@ import type {
   StockMonthRevenueParams,
   StockDetailResponse,
 } from '@/types/stock';
+import { STOCK_API_URL } from './constants';
 
 export const StockServices = {
   /**
@@ -12,7 +13,7 @@ export const StockServices = {
   async getTaiwanStockInfo(): Promise<StockInfoResponse> {
     try {
       const response = await api.get<StockInfoResponse>(
-        'https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo'
+        `${STOCK_API_URL}/api/v4/data?dataset=TaiwanStockInfo`
       );
       return response.data;
     } catch (error) {
@@ -26,7 +27,7 @@ export const StockServices = {
   async getStockMonthRevenue(params: StockMonthRevenueParams): Promise<StockDetailResponse> {
     try {
       const response = await api.get<StockDetailResponse>(
-        'https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockMonthRevenue',
+        `${STOCK_API_URL}/api/v4/data?dataset=TaiwanStockMonthRevenue`,
         { params }
       );
       return response.data;

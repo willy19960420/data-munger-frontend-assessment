@@ -1,4 +1,4 @@
-import { Table } from 'antd';
+import { Table, Empty, Button } from 'antd';
 
 import type { UserListSearchParams } from '@/types/user';
 
@@ -14,7 +14,6 @@ const DataTable = ({
 	searchParams,
 }: DataTableProps) => {
 	const {
-		pagination,
 		apiParams,
 		handlePaginationChange,
 	} = useTablePaginationParams<UserListSearchParams>(
@@ -26,11 +25,32 @@ const DataTable = ({
 
 	const {
 		data,
+		columns,
 		isLoading,
+    isError,
+    error,
+    refetch,
 	} = useQueryData(apiParams);
+
+
+  if (isError) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <Empty
+          description={error?.message || '載入失敗，請稍後重試'}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+        <Button type="primary" onClick={() => refetch()}>
+          重試
+        </Button>
+      </div>
+    );
+  }
 
 	return (
 		<Table
+      rowKey={(record) => record.id}
+			columns={columns}
 			loading={isLoading}
 			dataSource={data?.data ?? []}
 			pagination={

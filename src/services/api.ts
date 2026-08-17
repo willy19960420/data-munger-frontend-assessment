@@ -1,19 +1,14 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 import { refreshTokenService } from './authService';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { LOGIN_API_HOST, STOCK_API_HOST } from './constants';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
-const STOCK_API_HOST = 'api.finmindtrade.com';
-const LOGIN_API_HOST = 'lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws';
 
 const AUTH_PUBLIC_PATHS = ['/auth', '/auth/refresh'];
 

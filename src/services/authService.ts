@@ -2,9 +2,7 @@ import api from './api';
 import { useAuthStore } from '@/stores/authStore';
 import type { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types/auth';
 import { jwtDecode } from 'jwt-decode';
-
-const LOGIN_API_URL =
-  'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws';
+import { USER_LOGIN_API_URL } from './constants';
 
 type ApiLoginSuccessResponse = {
   access_token: string;
@@ -54,7 +52,7 @@ export const loginService = async (data: LoginRequest): Promise<LoginResponse> =
   let response;
 
   try {
-    response = await api.post<ApiLoginSuccessResponse>(`${LOGIN_API_URL}/auth`, data);
+    response = await api.post<ApiLoginSuccessResponse>(`${USER_LOGIN_API_URL}/auth`, data);
   } catch (error: any) {
     throw new Error(toApiErrorMessage(error));
   }
@@ -92,8 +90,8 @@ export const refreshTokenService = async (): Promise<RefreshTokenResponse> => {
     throw new Error('No refresh token available');
   }
 
-  const response = await api.post(`${LOGIN_API_URL}/auth/refresh`, {
-    refreshToken,
+  const response = await api.post(`${USER_LOGIN_API_URL}/auth/refresh`, {
+     refresh_token: refreshToken,
   });
 
   const data = response.data as
@@ -143,10 +141,4 @@ export const logoutService = async (): Promise<void> => {
     tokenExpires: null,
     user: null,
   });
-};
-
-// 獲取使用者列表
-export const getUserListService = async () => {
-  const response = await api.get('/api/users');
-  return response.data;
 };
